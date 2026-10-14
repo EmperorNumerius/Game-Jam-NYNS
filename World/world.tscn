@@ -4937,22 +4937,6 @@ position = Vector2(625, 6378)
 [node name="Worm3" parent="." instance=ExtResource("11_8mjb1")]
 position = Vector2(825, 23807)
 
-[node name="AkBank" type="AkBank" parent="."]
-bank = {
-"id": 3161908922,
-"name": "Main"
-}
-load_on = 1
-
-[node name="AkListener2D" type="AkListener2D" parent="."]
-
-[node name="Music" type="AkEvent2D" parent="."]
-event = {
-"id": 1479112770,
-"name": "Play_Cave_OST"
-}
-trigger_on = 2
-
 [node name="Civilization" parent="." instance=ExtResource("37_qn2ik")]
 position = Vector2(1216, 1492)
 

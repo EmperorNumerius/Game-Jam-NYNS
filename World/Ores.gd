@@ -72,13 +72,10 @@ func create_ore_chunk(ore, center_x, center_y, spawn_chance):
 	return ore_amt
 
 func create_ore(ore, x, y):
-	var ore_type = rng.randf_range(0.0, 3.0)
-	if ore_type > 1.0:
-		set_cell(0, Vector2i(x, y), 0, Vector2i(0, ore))
-	elif ore_type > 2.0:
-		set_cell(0, Vector2i(x, y), 0, Vector2i(1, ore))
-	else:
-		set_cell(0, Vector2i(x, y), 0, Vector2i(2, ore))
+	# Pick one of the three sprite variants for this ore at random.
+	# (The old version checked > 1.0 before > 2.0, so variant 1 never appeared.)
+	var variant = rng.randi_range(0, 2)
+	set_cell(0, Vector2i(x, y), 0, Vector2i(variant, ore))
 	
 func delete_ore(width, width_inc, depth, depth_inc):
 	for y in range(depth, depth+depth_inc):

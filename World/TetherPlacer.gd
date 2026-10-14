@@ -15,7 +15,6 @@ func _ready():
 	area_entered.connect(_on_area_entered)
 	area_exited.connect(_on_area_exited)
 	count_left = count_left
-	Wwise.register_game_obj(self, "OxygenTetherSFX")
 
 
 func _process(delta):
@@ -33,7 +32,9 @@ func _input(event):
 				nearest_tether = x
 		new_node.connect_tether(nearest_tether)
 		count_left -= 1
-		Wwise.post_event("Play_PlaceOxygenTether",self)
+		Sfx.play("place_tether")
+		Juice.shake(5.0)
+		Juice.dust(global_position, Color("4dc3ff"), 12, 160.0)
 
 
 func _on_area_entered(area):

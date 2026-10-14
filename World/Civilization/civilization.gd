@@ -29,7 +29,7 @@ var tween
 # Called when the node enters the scene tree for the first time.
 
 func _ready():
-	$"/root/World/UI/UpgradeMenu".show()
+	# The upgrade menu now only opens when the player walks into a workshop.
 	if !visited:
 		var tether = $"/root/World/OxygenTethers".get_child(0).duplicate()
 		$"/root/World/OxygenTethers".add_child(tether)

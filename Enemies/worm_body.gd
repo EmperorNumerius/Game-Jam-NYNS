@@ -12,8 +12,6 @@ func _ready():
 	if name != 'Tail':
 		if worm.curr < worm.max:
 			worm.curr += 1
-			print(worm.curr)
-			print(self)
 	else:
 		radius = 100
 

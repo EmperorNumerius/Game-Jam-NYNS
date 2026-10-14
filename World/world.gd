@@ -16,7 +16,7 @@ var civ_visited = true
 @onready var worm = $Worm
 
 func _ready():
-	connect("player_entered", check_civ)
+	Sfx.music("cave")
 	
 func _process(delta):
 	#print(player.position.y, ' ', DEPTH)
@@ -25,13 +25,11 @@ func _process(delta):
 		#print(player.position.y/16.0, ' ', DEPTH)
 		ores.create_ores(WIDTH, inc*2)
 		DEPTH += inc*2
-		print('increased')
 		#var wrm = worm.duplicate()
 		#add_child(wrm)
 	if (DEPTH%200 == 0) and DEPTH != 200*civ_amt:
 		civ_amt += 1
 		create_civilization(DEPTH)
-		print('civ created: ', DEPTH)
 
 func create_civilization(depth):
 	var civ = civilization.duplicate()

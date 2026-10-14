@@ -5,7 +5,6 @@ extends Label
 
 func _process(delta):
 	# Get the y position of the player
-	var y_position = -player.position.y
-
-	# Convert the y position to string and display it in the label
-	self.text = str(int(y_position)) + "m"
+	# 16 pixels (one tile) = 1 meter, counted downward from the surface
+	var meters = max(0, int(player.position.y / 16.0))
+	self.text = str(meters) + "m"

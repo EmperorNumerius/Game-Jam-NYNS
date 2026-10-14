@@ -22,8 +22,19 @@ var oxyore = 0
 @onready var in_civ = $InCiv
 @onready var upgrades = $"../UI/UpgradeMenu"
 
-func _ready():
-	Wwise.register_game_obj(self, "Break Crystal")
+# name, popup color, and sound for each ore row in the Ores tileset
+const ORE_INFO = [
+	{"name": "gems", "color": Color("a8e61d"), "sound": "crystal_break"},
+	{"name": "gold", "color": Color("ffcc00"), "sound": "ore_break"},
+	{"name": "iron", "color": Color("c9bcbc"), "sound": "ore_break"},
+	{"name": "oxyore", "color": Color("4dc3ff"), "sound": "crystal_break"},
+]
+const DIRT_COLORS = [Color("8a6450"), Color("6e5048"), Color("5a4a5e"), Color("4a4660")]
+
+var _bonk_cooldown = 0.0
+
+func _process(delta):
+	_bonk_cooldown -= delta
 
 func _physics_process(delta):
 	direction.x = Input.get_axis("Left", "Right")
@@ -37,24 +48,28 @@ func _physics_process(delta):
 
 		#coordinates for ores
 		var coords = tilemap.get_cell_atlas_coords(0,pos)
+		var cell_center = tilemap.to_global(tilemap.map_to_local(pos))
 		#check mining level
 		if tilemap.name == "Dirt":
 			if MINING_LEVEL < coords.x / 16:
+				# Too hard for the current drill: give feedback instead of silently stopping
+				if _bonk_cooldown <= 0.0:
+					_bonk_cooldown = 0.6
+					Juice.shake(4.0)
+					Juice.popup("Need a better drill!", cell_center, Color(1, 0.6, 0.5), 18)
 				break
 
-		if tilemap.name == "Ores": 
-			if coords.y == 0: #gems
-				gems += ORE_YIELD
-				Wwise.post_event("Crystal_Break", self)
-			if coords.y == 1: #gold
-				gold += ORE_YIELD
-				Wwise.post_event("Play_Ore_Break", self)
-			if coords.y == 2: #iron
-				iron += ORE_YIELD
-				Wwise.post_event("Play_Ore_Break", self)
-			if coords.y == 3: #oxyore
-				oxyore += ORE_YIELD
-				Wwise.post_event("Crystal_Break", self)
+		if tilemap.name == "Ores" and coords.y >= 0 and coords.y < ORE_INFO.size():
+			var ore = ORE_INFO[coords.y]
+			set(ore["name"], get(ore["name"]) + ORE_YIELD)
+			Sfx.play(ore["sound"])
+			Juice.popup("+%d %s" % [ORE_YIELD, ore["name"]], cell_center, ore["color"])
+			Juice.dust(cell_center, ore["color"], 14, 220.0)
+			Juice.shake(7.0)
+			Juice.hitstop(0.045)
+		elif tilemap.name == "Dirt":
+			Juice.dust(cell_center, DIRT_COLORS[clampi(coords.x / 16, 0, 3)], 6)
+			Juice.shake(2.0)
 		dig_timer.start()
 		SPEED = ORI_SPEED - RESISTANCE
 		tilemap.erase_cell(0, pos)
@@ -81,19 +96,24 @@ func _on_hitbox_area_entered(area):
 	oxygen_manager.o2_current += -12
 	oxygen_manager.o2_recovery = 1.0
 	hurt_timer.start()
-	print(oxygen_manager.o2_current)
+	Sfx.play("player_hit")
+	Juice.shake(16.0)
+	Juice.hitstop(0.08)
+	Juice.flash($Node2D)
+	Juice.popup("-12 O2", global_position + Vector2(0, -30), Color(1, 0.35, 0.35), 24)
 
 func _on_hurt_timer_timeout():
-	print('recover')
 	oxygen_manager.o2_recovery = 4.0
 
 
 func _on_in_civ_area_entered(area):
 	inside = true
+	Sfx.music("colony")
 
 
 func _on_in_civ_area_exited(area):
 	inside = false
+	Sfx.music("cave")
 
 
 func _on_in_workshop_area_entered(area):

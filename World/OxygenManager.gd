@@ -17,21 +17,23 @@ extends Node
 @export var o2_recovery = 4.0
 
 var checkpoint_pos = Vector2()
+var _was_recovering = false
 
 
 func _ready():
 	o2_current = o2_max
 	checkpoint_pos = get_parent().global_position
-	Wwise.register_game_obj(self, "OxygenSFX")
-	Wwise.post_event("lowOxygen",self)
 	
 
 func _process(delta):
-	if tether_placer.nearby_tethers.size() > 0:
+	var recovering = tether_placer.nearby_tethers.size() > 0
+	if recovering:
 		o2_current += o2_recovery * delta
+		if not _was_recovering and o2_current < o2_max * 0.95:
+			Sfx.play("oxygen_refill", -4.0)
 	else:
 		o2_current -= o2_depletion * delta
-		Wwise.post_event("oxygenRefill", self)
+	_was_recovering = recovering
 	if o2_current > o2_max:
 		o2_current = o2_max
 
@@ -43,12 +45,11 @@ func _process(delta):
 		get_parent().iron = ceili(get_parent().iron * remains_on_death)
 		get_parent().oxyore = ceili(get_parent().oxyore * remains_on_death)
 		o2_current = o2_max
+		Juice.shake(18.0)
+		Juice.popup("You passed out! Lost 75% of your ore", checkpoint_pos + Vector2(0, -60), Color(1, 0.5, 0.5), 22)
 	
-	if (o2_current <= o2_max / 2) :
-		Wwise.set_rtpc_value("PlayerOxygen", 49, self)
-		
-	else:
-		Wwise.set_rtpc_value("PlayerOxygen", 50, self)
+	# Warning beeps when oxygen is low and you're not refilling
+	Sfx.loop("low_oxygen", o2_current < o2_max * 0.3 and not recovering, -6.0)
 	o2_low_vignette.self_modulate.a = smoothstep(0.5, 0.2, o2_current / o2_max)
 	o2_low_fullscreen.self_modulate.a = smoothstep(5, 0, o2_current)
 
